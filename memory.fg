@@ -1,0 +1,99 @@
+#!syntax:pythonic
+
+# Utility functions
+#==========================================
+
+def makeCardDeck(p_numberOfCopy):
+	# Each card has a back and a face
+	js (p_numberOfCopy):
+		const cardDeck = []
+		for(let copy=1; copy<=p_numberOfCopy; copy++){
+			for( let cardNum=1; cardNum<=7; cardNum++){
+				cardDeck.push({back : "cardBack.svg", face : "card"+ cardNum +".jpg" });
+			}
+		}
+		return cardDeck
+
+def shuffleCards(p_cardDeck):
+	# shuffle the deck
+	js (p_cardDeck):
+		p_cardDeck.sort(() => Math.random() - 0.5);
+
+def distributeCards(p_cardDeck):
+	# place all the cards face downward onto the game table
+	js (p_cardDeck):
+		const gameTable = document.getElementById("gameTable");
+		for(let card of p_cardDeck){
+			const cardElement = document.createElement('img');
+			cardElement.src= "img/" + card.back
+			card.cardElement = cardElement
+			gameTable.appendChild(cardElement)
+		}
+
+def showFace(p_card):
+	js (p_card):
+		p_card.cardElement.src = "img/" + p_card.face
+
+def showBack(p_card):
+	js (p_card):
+		p_card.cardElement.src = "img/" + p_card.back
+
+
+# Prepare game table
+#=======================
+
+var numberOfCopy := 3
+
+var cardDeck := makeCardDeck(numberOfCopy)
+
+# shuffle deck
+shuffleCards(cardDeck)
+
+# place cards face downward onto the game table
+distributeCards(cardDeck)
+
+# Start of game
+#=======================
+
+# transform JavaScript Array into FuncSug "parallel list"
+var anyCard := listToPar(cardDeck)
+# now, anyCard is a "parallel list" of all cards placed on the table
+
+while not isNovalue(anyCard):
+	
+	# choose numberOfCopy cards
+	#--------------------------
+	
+	# This block:
+	#    parallel(forEachValueOf <variable>, select <number>):
+	#        select:
+	#            <instructions1>
+	#        do:
+	#            <instructions2>
+	# launch, in parallel, a sequence of "<instructions1> then <instructions2>" for each value of <variable>
+	#     and when <number> branches (called "selected branches") have reached the end of <instructions1>, all others branches are definitively interrupted
+	# When all the "selected branches" are finished, the block finished and return an union of the returns of all the "selected branches"
+	
+	var anyClickedCard := parallel(forEachValueOf anyCard, select numberOfCopy):
+		# In the following code, anyCard is only a single card
+		select:
+			awaitClickBeep(anyCard.cardElement)
+		do:
+			# now, anyCard can only be a clicked card
+			
+			# show the face of the clicked card
+			showFace(anyCard)
+			# return the clicked card (which is then "union-ed" to anyClickedCard by "anyClickedCard := parallelOfSelected...")
+			anyCard
+
+	# Compare visible faces
+	#----------------------
+	if allEqual(anyClickedCard.face):
+		print('OK')
+		anyCard := valuesFrom(anyCard, 'butNotFrom', anyClickedCard)
+	else:
+		print('Missed')
+		waitSeconds(3)
+		showBack(anyClickedCard)
+
+displayNewMessage('Congratulations, you have found all identical cards!')
