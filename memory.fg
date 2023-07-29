@@ -17,7 +17,11 @@ def makeCardDeck(p_numberOfCopy):
 def shuffleCards(p_cardDeck):
 	# shuffle the deck
 	js (p_cardDeck):
-		p_cardDeck.sort(() => Math.random() - 0.5);
+		//~ copied from https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
+		for (let i = p_cardDeck.length - 1; i > 0; i--) {
+			const j = Math.floor(Math.random() * (i + 1));
+			[p_cardDeck[i], p_cardDeck[j]] = [p_cardDeck[j], p_cardDeck[i]];
+		}
 
 def distributeCards(p_cardDeck):
 	# place all the cards face downward onto the game table
@@ -90,6 +94,8 @@ while not isNovalue(anyCard):
 	#----------------------
 	if allEqual(anyClickedCard.face):
 		print('OK')
+		js (anyClickedCard):
+			anyClickedCard.cardElement.classList.add('OK')
 		anyCard := valuesFrom(anyCard, 'butNotFrom', anyClickedCard)
 	else:
 		print('Missed')
