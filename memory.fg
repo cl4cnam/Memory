@@ -60,10 +60,10 @@ distributeCards(cardDeck)
 #=======================
 
 # transform JavaScript Array into FuncSug "parallel list"
-var anyCard := listToPar(cardDeck)
-# now, anyCard is a "parallel list" of all cards placed on the table
+var allRemainingCards := listToPar(cardDeck)
+# now, allRemainingCards is a "parallel list" of all cards placed on the table
 
-while not isNovalue(anyCard):
+while not isNovalue(allRemainingCards):
 	
 	# choose numberOfCopy cards
 	#--------------------------
@@ -78,7 +78,7 @@ while not isNovalue(anyCard):
 	#     and when <number> branches (called "selected branches") have reached the end of <instructions1>, all others branches are definitively interrupted
 	# When all the "selected branches" are finished, the block finished and return an union of the returns of all the "selected branches"
 	
-	var anyClickedCard := parallel(forEachValueOf anyCard, select numberOfCopy):
+	var allClickedCards := parallel(for anyCard in allRemainingCards, select numberOfCopy):
 		# In the following code, anyCard is only a single card
 		select:
 			awaitClickBeep(anyCard.cardElement)
@@ -87,19 +87,19 @@ while not isNovalue(anyCard):
 			
 			# show the face of the clicked card
 			showFace(anyCard)
-			# return the clicked card (which is then "union-ed" to anyClickedCard by "anyClickedCard := parallelOfSelected...")
+			# return the clicked card (which is then "union-ed" to allClickedCards by "allClickedCards := parallelOfSelected...")
 			anyCard
 
 	# Compare visible faces
 	#----------------------
-	if allEqual(anyClickedCard.face):
+	if allEqual(allClickedCards.face):
 		print('OK')
-		js (anyClickedCard):
-			anyClickedCard.cardElement.classList.add('OK')
-		anyCard := valuesFrom(anyCard, 'butNotFrom', anyClickedCard)
+		js (allClickedCards):
+			allClickedCards.cardElement.classList.add('OK')
+		allRemainingCards := valuesFrom(allRemainingCards, 'butNotFrom', allClickedCards)
 	else:
 		print('Missed')
 		waitSeconds(3)
-		showBack(anyClickedCard)
+		showBack(allClickedCards)
 
 displayNewMessage('Congratulations, you have found all identical cards!')
