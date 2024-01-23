@@ -1,5 +1,5 @@
 # Memory
-Concentration (card game) (with FuncSug)
+Concentration (card game)
 
 This is just an example program made with [FuncSug](https://github.com/cl4cnam/funcSug).
 
